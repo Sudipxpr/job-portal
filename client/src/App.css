@@ -1,0 +1,18 @@
+/* App.css */
+
+/* Smooth scrolling for the entire app */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Optional: Better scrolling feel for touch devices */
+body {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* You can still keep other global styles here */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
