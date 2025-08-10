@@ -18,7 +18,7 @@ Users can browse and apply to jobs, while admins can post and manage listings wi
 ### Backend
 - [Node.js](https://nodejs.org/)
 - [Express.js](https://expressjs.com/)
-- [MongoDB](https://www.mongodb.com/) with [Mongoose](https://mongoosejs.com/)
+- [MongoDB](https://www.mongodb.com/) 
 
 ### Media & Uploads
 - [Cloudinary](https://cloudinary.com/) for image hosting
