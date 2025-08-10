@@ -1,4 +1,3 @@
-
 import Navbar from "../shared/Navbar";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -106,7 +105,7 @@ const Login = () => {
               value={input.password}
               name="password"
               onChange={changeEventHandler}
-              placeholder="Set Password"
+              placeholder="Enter Your Password"
               required
             />
           </div>
