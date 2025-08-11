@@ -12,7 +12,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 const categories = [
-  "FullStack Developer",
+  "Mern Developer",
   "Mobile Developer",
   "Data Science",
   "UI/UX Designer",
