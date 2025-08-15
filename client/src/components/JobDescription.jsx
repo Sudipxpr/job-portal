@@ -76,7 +76,7 @@ const JobDescription = () => {
         className="max-w-4xl mx-auto my-10 p-4"
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.40, ease: "easeOut" }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
       >
         <div className="flex items-center justify-between">
           <div>
@@ -131,8 +131,7 @@ const JobDescription = () => {
           <h1 className="text-lg font-bold mt-4">
             Experience:
             <span className="font-normal pl-4 text-gray-800">
-              {" "}
-              {singleJob?.experience} years
+              {singleJob?.experience ?? 0} years
             </span>
           </h1>
           <h1 className="text-lg font-bold mt-4">

@@ -15,6 +15,7 @@ import PostJobs from "./components/admin/PostJobs";
 import Applicants from "./components/admin/Applicants";
 import PrivateAdminRoute from "./components/admin/PrivateAdminRoute";
 import About from "./components/About";
+import EditJob from "./components/admin/Editjob";
 
 const appRouter = createBrowserRouter([
   {
@@ -99,7 +100,10 @@ const appRouter = createBrowserRouter([
       </PrivateAdminRoute>
     ),
   },
-  
+   {path:"/admin/jobs/edit/:id" ,
+    element:<PrivateAdminRoute><EditJob /></PrivateAdminRoute>
+   },
+
 ]);
 function App() {
   return (

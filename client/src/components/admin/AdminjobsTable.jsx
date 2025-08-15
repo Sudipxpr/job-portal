@@ -1,145 +1,169 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Edit2, Eye, MoreHorizontal } from "lucide-react";
-import { useSelector } from "react-redux";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
+import axios from "axios";
+import { JOB_API_END_POINT } from "@/utils/constant";
+import { setAllAdminJobs } from "@/redux/Jobslice";
 import { useNavigate } from "react-router-dom";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Eye, MoreHorizontal, Trash2, Pencil } from "lucide-react";
 
-const AdminjobsTable = () => {
-  const { searchCompanyByText, loading: companyLoading, error: companyError } = useSelector(
-    (store) => store.company
-  );
-  const { allAdminJobs, loading: jobsLoading, error: jobsError } = useSelector(
-    (store) => store.job
-  );
-
+const AdminJobsTable = () => {
   const navigate = useNavigate();
-  const [filteredJobs, setFilteredJobs] = useState(allAdminJobs || []);
-  const [isSearching, setIsSearching] = useState(false);
+  const { allAdminJobs } = useSelector((state) => state.job);
+  const dispatch = useDispatch();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState(null);
 
-  useEffect(() => {
-    if (!Array.isArray(allAdminJobs) || allAdminJobs.length === 0) {
-      setFilteredJobs([]);
-      return;
+  const filteredJobs = allAdminJobs?.filter((job) =>
+    job?.title?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleDelete = async () => {
+    try {
+      const res = await axios.delete(
+        `${JOB_API_END_POINT}/delete/${selectedJobId}`,
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        dispatch(
+          setAllAdminJobs(
+            allAdminJobs.filter((job) => job._id !== selectedJobId)
+          )
+        );
+        toast.success("Job deleted successfully!");
+      } else {
+        toast.error("Failed to delete job.");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete job");
+    } finally {
+      setOpenDialog(false);
+      setSelectedJobId(null);
     }
-
-    const searchText = searchCompanyByText?.toLowerCase() || "";
-
-    if (searchText) setIsSearching(true);
-    else setIsSearching(false);
-
-    const filtered = allAdminJobs.filter((job) => {
-      if (!searchText) return true;
-
-      const companyName = job?.company?.name?.toLowerCase() || "";
-      const jobTitle = job?.title?.toLowerCase() || "";
-
-      return companyName.includes(searchText) || jobTitle.includes(searchText);
-    });
-
-    setFilteredJobs(filtered);
-  }, [allAdminJobs, searchCompanyByText]);
-
-  // Handle loading and error states first
-  if (companyLoading || jobsLoading) {
-    return <div className="text-center p-5">Loading jobs...</div>;
-  }
-
-  if (companyError || jobsError) {
-    return (
-      <div className="text-center text-red-600 p-5">
-        Error loading jobs. Please try again later.
-      </div>
-    );
-  }
+  };
 
   return (
-    <div className="my-5">
-      <Table>
-        <TableCaption>A list of your posted Jobs</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="font-semibold text-lg bg-gray-100 text-gray-600">
-              Company Name
-            </TableHead>
-            <TableHead className="font-semibold text-lg bg-gray-100 text-gray-600">
-              Role
-            </TableHead>
-            <TableHead className="font-semibold text-lg bg-gray-100 text-gray-600">
-              Date
-            </TableHead>
-            <TableHead className="text-right p-1 text-lg bg-gray-100 text-gray-600 font-semibold">
-              Action
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {/* No jobs at all */}
-          {allAdminJobs.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={4} className="text-center">
-                No Jobs Listed
-              </TableCell>
-            </TableRow>
-          )}
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <Input
+          placeholder="Search jobs..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-1/3 py-2"
+        />
+      </div>
 
-          {/* No matches after search */}
-          {allAdminJobs.length > 0 && filteredJobs.length === 0 && isSearching && (
-            <TableRow>
-              <TableCell colSpan={4} className="text-center">
-                No jobs matched your search "{searchCompanyByText}"
-              </TableCell>
-            </TableRow>
+      <table className="w-full border">
+        <thead>
+          <tr className="border-b bg-gray-100">
+            <th className="p-2 text-left">Title</th>
+            <th className="p-2 text-left">Company</th>
+            <th className="p-2 text-left">Location</th>
+            <th className="p-5 text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredJobs?.length > 0 ? (
+            filteredJobs.map((job) => (
+              <tr key={job._id} className="border-b">
+                <td className="p-2">{job.title}</td>
+                <td className="p-2">{job.company?.name}</td>
+                <td className="p-2">{job.location}</td>
+                <td className="p-2 float-right">
+                  <div className="flex items-center gap-2">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          aria-label="Open actions menu"
+                          disabled={!job._id}
+                        >
+                          <MoreHorizontal />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-36">
+                        <div
+                          className="flex items-center w-fit gap-2 p-2 cursor-pointer hover:bg-gray-100 rounded-md"
+                          onClick={() =>
+                            navigate(`/admin/jobs/${job._id}/applicants`)
+                          }
+                          role="button"
+                          tabIndex={0}
+                        >
+                          <Eye className="w-4" />
+                          <span>Applicants</span>
+                        </div>
+                        <div
+                          className="flex items-center w-fit gap-2 p-2 cursor-pointer hover:bg-gray-100 rounded-md"
+                          onClick={() => navigate(`/admin/jobs/edit/${job._id}`)}
+                          role="button"
+                          tabIndex={0}
+                        >
+                          <Pencil className="w-4" />
+                          <span>Edit</span>
+                        </div>
+                        <div
+                          className="flex items-center w-fit gap-2 p-2 cursor-pointer hover:bg-gray-100 rounded-md"
+                          onClick={() => {
+                            setSelectedJobId(job._id);
+                            setOpenDialog(true);
+                          }}
+                          role="button"
+                        >
+                          <Trash2 className="w-4 stroke-red-500" />
+                          <span className="text-red-500">Delete</span>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={4} className="text-center text-gray-500 p-4">
+                No jobs found.
+              </td>
+            </tr>
           )}
+        </tbody>
+      </table>
 
-          {/* Show filtered jobs */}
-          {filteredJobs.map((job) => (
-            <TableRow key={job._id ?? job.title}>
-              <TableCell className="text-lg">{job.company?.name ?? "-"}</TableCell>
-              <TableCell className="text-lg">{job.title ?? "-"}</TableCell>
-              <TableCell className="text-lg">
-                {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : "-"}
-              </TableCell>
-              <TableCell className="text-right p-1">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button aria-label="Open actions menu" disabled={!job._id}>
-                      <MoreHorizontal />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-32">
-                   
-                    <div
-                      className="flex items-center w-fit gap-2 p-2 cursor-pointer hover:bg-gray-100 rounded-md"
-                      onClick={() => job._id && navigate(`/admin/jobs/${job._id}/applicants`)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if ((e.key === "Enter" || e.key === " ") && job._id) {
-                          navigate(`/admin/jobs/${job._id}/applicants`);
-                        }
-                      }}
-                    >
-                      <Eye className="w-4" />
-                      <span>Applicants</span>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      {/* Confirmation Dialog */}
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you sure?</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. This will permanently delete the job
+              posting.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenDialog(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Confirm Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
-export default AdminjobsTable;
+export default AdminJobsTable;
