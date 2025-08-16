@@ -11,10 +11,16 @@ import {
 import { Badge } from "./ui/badge";
 import { useSelector } from "react-redux";
 
-const AppliedJob = () => {
-  const { allAppliedJobs } = useSelector((store) => store.job);
+// ...existing code...
 
-  // Badge color handler
+const AppliedJob = () => {
+  const { allAppliedJobs = [] } = useSelector((store) => store.job);
+
+  // Filter out deleted jobs (where job is null or undefined)
+  const validAppliedJobs = allAppliedJobs.filter(
+    (appliedJob) => appliedJob.job
+  );
+
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case "accepted":
@@ -28,8 +34,7 @@ const AppliedJob = () => {
     }
   };
 
-  // Sort by newest date first
-  const sortedJobs = [...allAppliedJobs].sort(
+  const sortedJobs = [...validAppliedJobs].sort(
     (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
   );
 
@@ -63,14 +68,16 @@ const AppliedJob = () => {
                   })}
                 </TableCell>
                 <TableCell className="font-medium">
-                  {appliedJob.job.title}
+                  {appliedJob.job?.title || "N/A"}
                 </TableCell>
-                <TableCell>{appliedJob.job.company.name}</TableCell>
+                <TableCell>
+                  {appliedJob.job?.company?.name || "N/A"}
+                </TableCell>
                 <TableCell className="text-right">
                   <Badge
                     className={`${getStatusColor(appliedJob.status)} capitalize`}
                   >
-                    {appliedJob.status}
+                    {appliedJob.status || "N/A"}
                   </Badge>
                 </TableCell>
               </TableRow>
@@ -83,3 +90,4 @@ const AppliedJob = () => {
 };
 
 export default AppliedJob;
+// ...existing code...
