@@ -4,7 +4,7 @@ import { Label } from "./ui/label";
 const filterData = [
   {
     filterType: "Location",
-    array: ["Delhi NCR", "Bangalore", "Hyderabad", "Kolkata", "Mumbai", "Pune"],
+    array: ["Delhi NCR", "Bangalore", "Hyderabad", "Kolkata", "Mumbai"],
   },
   {
     filterType: "Job Role",
@@ -14,7 +14,6 @@ const filterData = [
       "Mern Developer",
       "Data Analyst",
       "UI/UX Designer",
-      "Mobile Developer",
     ],
   },
   {
