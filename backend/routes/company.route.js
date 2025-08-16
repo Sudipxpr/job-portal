@@ -5,6 +5,7 @@ import {
   getCompanyById,
   registerCompany,
   updateCompany,
+    deleteCompany
 } from "../controllers/company.controller.js";
 import { singleUpload } from "../middlewares/multer.js"; //  Import this
 
@@ -16,5 +17,9 @@ router.route("/get/:id").get(isAuthenticated, getCompanyById);
 
 //  FIX: Add singleUpload middleware here
 router.route("/update/:id").put(isAuthenticated, singleUpload, updateCompany);
+// ...existing code...
 
+router.route("/delete/:id").delete(isAuthenticated, deleteCompany);
+
+// ...existing code...
 export default router;

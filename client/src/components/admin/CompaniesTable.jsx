@@ -10,18 +10,33 @@ import {
 } from "../ui/table";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Edit2, MoreHorizontal } from "lucide-react";
-import { useSelector } from "react-redux";
+import { Edit2, MoreHorizontal, Trash2 } from "lucide-react";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { Button } from "../ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import axios from "axios";
+import { toast } from "sonner";
+import { COMPANY_API_END_POINT } from "@/utils/constant"; // Make sure this is defined
+import { setCompanies } from "@/redux/companySlice"; // Update with actual slice
 
 const CompaniesTable = () => {
   const { companies, searchCompanyByText } = useSelector(
     (store) => store.company
   );
-
-  const navigate=useNavigate();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const hasCompanies = Array.isArray(companies) && companies.length > 0;
   const [filterCompany, setFilterCompany] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedCompanyId, setSelectedCompanyId] = useState(null);
 
   useEffect(() => {
     if (!hasCompanies) {
@@ -38,6 +53,29 @@ const CompaniesTable = () => {
 
     setFilterCompany(filtered);
   }, [companies, searchCompanyByText, hasCompanies]);
+
+  const handleDelete = async () => {
+    try {
+      const res = await axios.delete(
+        `${COMPANY_API_END_POINT}/delete/${selectedCompanyId}`,
+        { withCredentials: true }
+      );
+      if (res.data.success) {
+        dispatch(
+          setCompanies(companies.filter((c) => c._id !== selectedCompanyId))
+        );
+        toast.success("Company deleted successfully!");
+      } else {
+        toast.error("Failed to delete company.");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete company");
+    } finally {
+      setOpenDialog(false);
+      setSelectedCompanyId(null);
+    }
+  };
 
   return (
     <div className="my-5">
@@ -74,9 +112,22 @@ const CompaniesTable = () => {
                       <MoreHorizontal />
                     </PopoverTrigger>
                     <PopoverContent className="w-32">
-                      <div className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-100 rounded-md" onClick={()=>navigate(`/admin/companies/${company._id}`)}>
+                      <div
+                        className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-100 rounded-md"
+                        onClick={() => navigate(`/admin/companies/${company._id}`)}
+                      >
                         <Edit2 className="w-5" />
                         <span>Edit</span>
+                      </div>
+                      <div
+                        className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-100 rounded-md"
+                        onClick={() => {
+                          setSelectedCompanyId(company._id);
+                          setOpenDialog(true);
+                        }}
+                      >
+                        <Trash2 className="w-5 stroke-red-500" />
+                        <span className="text-red-500">Delete</span>
                       </div>
                     </PopoverContent>
                   </Popover>
@@ -86,6 +137,26 @@ const CompaniesTable = () => {
           )}
         </TableBody>
       </Table>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you sure?</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. This will permanently delete the company.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenDialog(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Confirm Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
