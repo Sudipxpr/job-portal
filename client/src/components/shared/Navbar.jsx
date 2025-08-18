@@ -76,6 +76,9 @@ const Navbar = () => {
                 <li className="hover:text-indigo-600">
                   <Link to="/jobs">Jobs</Link>
                 </li>
+                <li className="hover:text-indigo-600">
+                  <Link to="/career-advice">Career Advice</Link>
+                </li>
               </>
             )}
           </ul>
@@ -188,6 +191,13 @@ const Navbar = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Jobs
+              </Link>
+              <Link
+                to="/career-advice"
+                className="block hover:text-indigo-600"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Career Advice
               </Link>
             </>
           )}

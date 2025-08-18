@@ -16,6 +16,7 @@ import Applicants from "./components/admin/Applicants";
 import PrivateAdminRoute from "./components/admin/PrivateAdminRoute";
 import About from "./components/About";
 import EditJob from "./components/admin/Editjob";
+import CareerAdvice from "./components/CareerAdvice";
 
 const appRouter = createBrowserRouter([
   {
@@ -50,6 +51,10 @@ const appRouter = createBrowserRouter([
   path: "/about",
   element: <About />
 },
+ {
+    path: "/career-advice",
+    element: <CareerAdvice />,
+  },
   //admin site starts here
   {
     path: "/admin/companies",
